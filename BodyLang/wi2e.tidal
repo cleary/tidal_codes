@@ -1,3 +1,4 @@
+-- original
 setcps(140/120/2)
 
 --- this is all mainly midi in ableton 10, using the wavetable synthesis
@@ -38,5 +39,57 @@ do
      -- # acc "0.2 -0.4"
     #cutoff (slsine 300 600 16)
 
+--------------------------------
+-- giving it sounds that work in standard tidal
+setcps(140/120/2)
 
+--- this is all mainly midi in ableton 10, using the wavetable synthesis
+--- also a granulator max plugin
+--- alsoo my license ran out so i can't resample it :'( 
+
+let
+    slsine a b c = (range a b $ slow c $ sine)
+    g = gain
+    rep n p = stut' (n-1) (0.125/2*3) (|*| gain "1") $ p
+    sp = speed
+    acc = accelerate
+
+do
+  let mix = [0.98,1.1,1,1.05,0.8] --  0.98, 1.1, 1, 1.05 , 0.8
+      bassPat1 = "[d2 as1]/4"
+      bassPat2 = "[d2 as1 f2 [as2 a2]]/8"
+      chordPat = "[[d6,f6] [[as5, f6,d7] [as5, f6, a6,d7]] [f6, as6] [[as6, c7] [c7, a6]]]/8"
+  d1 $ note "[d7 d7 f7 [g7 <a7 e7>]]/8" # s "superchip"
+    |*| g (mix!!4)
+    -- # silence
+  d2 $ note "c4" # s "superfm"
+    |*| g (mix!!4)
+    -- # silence
+  d3 $ note (bassPat2) # s "superchip"
+    |*| g (mix!!4)
+    -- # silence
+  d4 $ note (
+      slow 1 $ arp "<updown converge>" $
+      off 0.125 (+7) $
+      chordPat) # s "superpiano"
+      |+| note "-48"
+    |*| g (mix!!3)
+    -- # silence
+  d5
+    $ every 4 (#lpf "1200 800 400")
+    $ every 5 (chunk 2 (hurry 2))
+    -- $ foldEve
+    $ stack [
+      off 0.25 (|+| n "<1 3 5 2>") $ struct "[t(3,8)]*4? t(5,8)" $ n "<0 1 4>"
+      # sound "[jungle jungle jungle]/8" # unit "c" # speed "8" # gain "0.85",
+      --stutWith 16 (shift' 100 $ choose [0.0625*2, 0.0625, 0.0625/2]) ((|* sp 1.2).(|* g 0.8)) $
+      stutWith 16 (choose [0.0625*2, 0.0625, 0.0625/2]) ((|* sp 1.2).(|* g 0.8)) $
+      sometimes (rep 2) $ whenmod 7 4 (jux (iter 4)) $
+      s "~ sn:2" #hpf 40 # g 0.92,
+      slow 1 $ s "bd(<3 5>,16,<2 8 10>)" #shape 0.2 #ctf "<850 2000>"
+    ]
+    |*| g (mix!!1)
+    -- # sp "< -0.75>"
+    # acc "0.2 -0.4"
+    #cutoff (slsine 300 600 16)
 
